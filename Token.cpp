@@ -16,13 +16,15 @@ string  Token::genrate_Token() {
 
    //i  will  call  the   encprty  Funciton  to  make    Gaurav  
 
+ std::string key = generateRandomBytes(16); // 16 bytes for AES-128
+    std::string iv = generateRandomBytes(16);  // 16 bytes IV
 
    /*
-   string  e_username  =  encpty(username_reciver);
-   string  e_time  =  encyrpt(time);
+   string  e_username  =  encpty(username_reciver, key , iv );
+   string  e_time  =  encyrpt(time, key , iv);
   
    string  final_token  =  e_username+"."+e_token+"."+file_format;
-   return  encyrpt(final_token);
+   return  encyrpt(final_token, key , iv);
    */
    
     return  "";
