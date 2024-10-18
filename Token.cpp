@@ -34,6 +34,7 @@ Aes_Token  aes_token;
     const std::string mit = "mit";
     const std::string wpu = "wpu";
 
+
     size_t tokenStart = input.find(kothrud) + kothrud.length();
     size_t tokenEnd = input.find(mit, tokenStart);
     
@@ -47,6 +48,21 @@ Aes_Token  aes_token;
     cout << "E_token is :" << e_token << endl;
     cout << "Key is :" << key << endl;
     cout << "IV is :" << iv<< endl;
+
+ std::string key = generateRandomBytes(16); // 16 bytes for AES-128
+    std::string iv = generateRandomBytes(16);  // 16 bytes IV
+
+   /*
+   string  e_username  =  encpty(username_reciver, key , iv );
+   string  e_time  =  encyrpt(time, key , iv);
+  
+   string  final_token  =  e_username+"."+e_token+"."+file_format;
+   return  encyrpt(final_token, key , iv);
+   */
+   
+    return  "";
+}
+
 
     string t = aes_token.decrypt(e_token, key , iv);
     
@@ -107,7 +123,8 @@ int  main() {
     T1.decrypt_token(t);
 
 
-
-
+*/
+    // If all characters match, return true
+    return true;
 
 }
