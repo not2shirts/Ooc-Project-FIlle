@@ -1,22 +1,23 @@
-#ifndef Timer_h
-#define Timer_h
+#ifndef TIMER_H
+#define TIMER_H
 
 #include <iostream>
 #include <iomanip>
 #include <ctime>
 #include <sstream>
 #include <string>
-#include<chrono>
+#include <chrono>
+#include <stdexcept>
 
-// Function to convert date string to time_t
 class Timer {
-    public  :
-    time_t convertToTimeT(const std::string& dateStr) {
+public:
+    // Function to convert date string to time_t
+    std::time_t convertToTimeT(const std::string& dateStr) {
         std::tm tm = {};
         std::istringstream ss(dateStr);
         
         // Use std::get_time to parse the date string
-        ss >> std::get_time(&tm, "%b %d %H:%M:%S %Y");
+        ss >> std::get_time(&tm, "%m %d %H:%M:%S %Y");
         
         if (ss.fail()) {
             throw std::runtime_error("Failed to parse date string");
@@ -27,16 +28,31 @@ class Timer {
 
     // Function to compare two date strings
     bool compareDates(const std::string& expiration_time) {
-        time_t e_time = convertToTimeT(expiration_time);
-       //wev  are   paasin  them   but  we  can   simply  so 
-       auto now = std::chrono::system_clock::now();
+        std::time_t e_time = convertToTimeT(expiration_time);
+        auto now = std::chrono::system_clock::now();
     
-    // Convert it to time_t to output a human-readable time
-    std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+        // Convert it to time_t to output a human-readable time
+        std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
     
-       if(  (e_time >=  currentTime))  return  true;
-       else return  false;
+        return (e_time >= currentTime);
+    }
+
+    // Function to get the current time in the specified format
+    std::string current_Time() {
+        auto now = std::chrono::system_clock::now();
+        
+        // Convert time_point to time_t
+        std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+        
+        // Convert time_t to tm structure
+        std::tm* tmPtr = std::localtime(&currentTime);
+        
+        // Format the time to the desired format
+        std::ostringstream oss;
+        oss << std::put_time(tmPtr, "%m %d %H:%M:%S %Y");
+        
+        return oss.str();
     }
 };
 
-#endif
+#endif // TIMER_H

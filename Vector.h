@@ -56,6 +56,14 @@ class  db  {
         }
         return ;
     }
+
+    bool  findByUsername(string  username) {
+        for(int i  = 0 ;i <  Db.size();i++) {
+            if(Db.at(i).get_username().compare(username) == 0 ) return  true;
+        }
+        return  false;
+
+    }
 };
 
 
