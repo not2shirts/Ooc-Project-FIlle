@@ -10,10 +10,17 @@ set(SOURCES
     #FileController.cpp
     #FileService.cpp
     #File.cpp
-   Token.cpp
-   Token_test.cpp
-    # other_file.cpp  # Add more .cpp files if neede
+  # Token.cpp
+   #Token_test.cpp
+   User.h
+   Vector.h
+   Console.cpp
+    # other_file.cpp  # Add more .cpp files if neede 
 )
+if(NOT WIN32)
+    find_package(Threads REQUIRED)
+    target_link_libraries(TestProject PRIVATE Threads::Threads)
+endif()
 
 # Add the executable (target) from the source files
 add_executable(TestProject ${SOURCES})
