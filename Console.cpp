@@ -8,20 +8,15 @@
 #include "Timer.h"
 #include "Vector.h"
 #include "Time_Convert.h"
-
-
-//#include "Global_Exception_Handler.h"
+#include "Logger.h"
 #include "Final_Service.h"
 
 using namespace std;
 
 void loadingBar(int seconds) {
-    const int total = 20; // Total steps in the loading bar
+    const int total = 20;
     for (int i = 0; i <= total; ++i) {
-        // Calculate the percentage of completion
         int progress = (i * 100) / total;
-
-        // Print the loading bar
         cout << "\r[";
         int pos = total * progress / 100;
         for (int j = 0; j < total; ++j) {
@@ -29,123 +24,139 @@ void loadingBar(int seconds) {
             else cout << " ";
         }
         cout << "] " << progress << "%";
-        cout.flush(); // Flush the output buffer
-
-        // Wait for a short duration
-        Sleep(seconds * 1000 / total); // Convert to milliseconds
+        cout.flush();
+        Sleep(seconds * 1000 / total);
     }
-    cout << endl; // Move to the next line after loading is complete
+    cout << endl;
 }
-
 
 int main() {
-    db Repo;
-    Service service;
-
-    e_time  exp_time;
-
+    // Initialize logger first, before any other operations
+    Logger logger("app.log", 1024 * 1024); // 1MB size limit
     
+    try {
+        db Repo;
+        Service service;
+        e_time exp_time;
 
-    cout << "===============================" << endl;
-    cout << "  Hello User! Welcome to the App  " << endl;
-    cout << "===============================" << endl;
+        logger.info("Application started");
 
-    string username, pass;
-    cout << "\nPlease enter your Username: ";
-    cin >> username;
-    cout << "Password: ";
-    cin >> pass;
+        cout << "===============================" << endl;
+        cout << "  Hello User! Welcome to the App  " << endl;
+        cout << "===============================" << endl;
 
-    User user(username, pass);
+        string username, pass;
+        cout << "\nPlease enter your Username: ";
+        cin >> username;
+        cout << "Password: ";
+        cin >> pass;
 
-    if (Repo.search(user)) {
-        cout << "\nWelcome, " << user.get_username() << "!" << endl;
+        User user(username, pass);
+        logger.info("Login attempt for user: " + username);
 
-        int choice = 0;
-        do {
-            cout << "\nPlease select an option:" << endl;
-            cout << "1. File Encryption" << endl;
-            cout << "2. File Decryption" << endl;
-            cout << "3. Exit" << endl;
-            cout << "Your choice: ";
-            cin >> choice;
+        if (Repo.search(user)) {
+            logger.info("User " + username + " successfully logged in");
+            cout << "\nWelcome, " << user.get_username() << "!" << endl;
 
-            switch (choice) {
-                case 1: {
-                    cout << "\n-- File Encryption Service --" << endl;
+            int choice = 0;
+            do {
+                cout << "\nPlease select an option:" << endl;
+                cout << "1. File Encryption" << endl;
+                cout << "2. File Decryption" << endl;
+                cout << "3. Exit" << endl;
+                cout << "Your choice: ";
+                cin >> choice;
 
-                    string reciever, expiration_time, input_file_path;
+                switch (choice) {
+                    case 1: {
+                        logger.info("User selected file encryption");
+                        cout << "\n-- File Encryption Service --" << endl;
+                        string receiver, expiration_time, input_file_path;
 
-                    cout << "Enter the Reciever's Username: ";
-                    cin >> reciever;
+                        cout << "Enter the Receiver's Username: ";
+                        cin >> receiver;
 
-                    if (!Repo.findByUsername(reciever)) {
-                        cout << "\nError: Reciever does not exist in the database." << endl;
-                        cout << "Do you want to try again or exit? (1 for Retry, 2 for Exit): ";
-                        int retryChoice;
-                        cin >> retryChoice;
-                        if (retryChoice == 2) {
-                            break;
-                        } else {
-                            continue;
+                        if (!Repo.findByUsername(receiver)) {
+                            logger.warn("Invalid receiver username entered: " + receiver);
+                            cout << "\nError: Receiver does not exist in the database." << endl;
+                            cout << "Do you want to try again or exit? (1 for Retry, 2 for Exit): ";
+                            int retryChoice;
+                            cin >> retryChoice;
+                            if (retryChoice == 2) {
+                                break;
+                            } else {
+                                continue;
+                            }
                         }
+
+                        expiration_time = exp_time.formatExpirationTime();
+                        cout << "TIME IS  " << expiration_time << endl;
+                        
+                        cout << "Enter the file location: ";
+                        cin >> input_file_path;
+                        
+                        logger.info("Processing encryption request - File: " + input_file_path + 
+                                  ", Receiver: " + receiver);
+
+                        cout << "Hey, tell me where you want the output file saved: ";
+                        string output_file;
+                        cin >> output_file;
+
+                        loadingBar(5);
+                        
+                        try {
+                            service.Encrypt(username, receiver, input_file_path, expiration_time, output_file);
+                            logger.info("File encryption successful - Output: " + output_file);
+                            cout << "File has been successfully encrypted!" << endl;
+                        } catch (const std::exception& e) {
+                            logger.error("Encryption failed: " + string(e.what()));
+                            cout << "Error during encryption: " << e.what() << endl;
+                        }
+                        break;
                     }
+                    case 2: {
+                        logger.info("User selected file decryption");
+                        cout << "\n-- File Decryption Service --" << endl;
+                        string input_file_path;
+                        cout << "Enter the file location: ";
+                        cin >> input_file_path;
 
-                    cout << "Expiration Time : ";
-                   
-                     expiration_time =  exp_time.formatExpirationTime();
-                    cout<<"tIME IS  " <<expiration_time<<endl;
-
-                    cin >> input_file_path;
-
-
-                    cout << "\nFile encryption will now proceed..." << endl;
-
-                    cout << "Hey, tell me where you want the output file saved: ";
-                    string output_file;
-                    cin >> output_file;
-
-                    // Simulates the encryption process
-                    loadingBar(5);
-
-                    service.Encrypt(username, reciever, input_file_path, expiration_time, output_file);
-
-
-                    cout << "File has been successfully encrypted!" << endl;
-
-                    break;
+                        cout << "Hey, tell me where you want the output file saved: ";
+                        string output_file;
+                        cin >> output_file;
+                        
+                        logger.info("Processing decryption request - File: " + input_file_path);
+                        
+                        loadingBar(5);
+                        
+                        try {
+                            service.Decrypt(username, input_file_path, output_file);
+                            logger.info("File decryption successful - Output: " + output_file);
+                            cout << "File has been successfully decrypted!" << endl;
+                        } catch (const std::exception& e) {
+                            logger.error("Decryption failed: " + string(e.what()));
+                            cout << "Error during decryption: " << e.what() << endl;
+                        }
+                        break;
+                    }
+                    case 3:
+                        logger.info("User " + username + " logging out");
+                        cout << "Exiting the application. Thank you for using the app!" << endl;
+                        break;
+                    default:
+                        logger.warn("Invalid menu choice selected: " + to_string(choice));
+                        cout << "\nInvalid choice. Please select a valid option." << endl;
                 }
-                case 2: {
-                    cout << "\n-- File Decryption Service --" << endl;
-
-                    string input_file_path;
-                    cout << "Enter the file location: ";
-                    cin >> input_file_path;
-
-                 
-                    // Decryption logic here
-                    cout << "Hey, tell me where you want the output file saved: ";
-                    string output_file;
-                    cin >> output_file;
-                     loadingBar(5);    
-                    service.Decrypt(username,input_file_path,output_file);
-
-                    cout << "File has been successfully decrypted!" << endl;
-
-                    break;
-                }
-                case 3:
-                    cout << "Exiting the application. Thank you for using the app!" << endl;
-                    break;
-                default:
-                    cout << "\nInvalid choice. Please select a valid option." << endl;
-            }
-        } while (choice != 3);
-    } else {
-        cout << "\nError: Invalid username or password!" << endl;
+            } while (choice != 3);
+        } else {
+            logger.warn("Failed login attempt for user: " + username);
+            cout << "\nError: Invalid username or password!" << endl;
+        }
+    } catch (const std::exception& e) {
+        logger.error("Application error: " + string(e.what()));
+        cout << "An error occurred: " << e.what() << endl;
     }
 
+    logger.info("Application shutting down");
     return 0;
-
 }
-
