@@ -41,7 +41,9 @@ void loadingBar(int seconds) {
 int main() {
     db Repo;
     Service service;
+
     e_time  exp_time;
+
     
 
     cout << "===============================" << endl;
@@ -71,6 +73,7 @@ int main() {
             switch (choice) {
                 case 1: {
                     cout << "\n-- File Encryption Service --" << endl;
+
                     string reciever, expiration_time, input_file_path;
 
                     cout << "Enter the Reciever's Username: ";
@@ -92,8 +95,9 @@ int main() {
                    
                      expiration_time =  exp_time.formatExpirationTime();
                     cout<<"tIME IS  " <<expiration_time<<endl;
-                    cout << "Enter the file location: ";
+
                     cin >> input_file_path;
+
 
                     cout << "\nFile encryption will now proceed..." << endl;
 
@@ -103,7 +107,9 @@ int main() {
 
                     // Simulates the encryption process
                     loadingBar(5);
+
                     service.Encrypt(username, reciever, input_file_path, expiration_time, output_file);
+
 
                     cout << "File has been successfully encrypted!" << endl;
 
@@ -111,6 +117,7 @@ int main() {
                 }
                 case 2: {
                     cout << "\n-- File Decryption Service --" << endl;
+
                     string input_file_path;
                     cout << "Enter the file location: ";
                     cin >> input_file_path;
@@ -122,6 +129,7 @@ int main() {
                     cin >> output_file;
                      loadingBar(5);    
                     service.Decrypt(username,input_file_path,output_file);
+
                     cout << "File has been successfully decrypted!" << endl;
 
                     break;
@@ -138,4 +146,6 @@ int main() {
     }
 
     return 0;
+
 }
+

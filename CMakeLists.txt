@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Specify the source files
 set(SOURCES
+
     aes_file.h
     aes.h
     Token_Service.h
@@ -21,7 +22,12 @@ set(SOURCES
     Logger.h
     Vector.h
     Console.cpp
+
 )
+if(NOT WIN32)
+    find_package(Threads REQUIRED)
+    target_link_libraries(TestProject PRIVATE Threads::Threads)
+endif()
 
 # Add the executable (target) from the source files
 add_executable(TestProject ${SOURCES})
